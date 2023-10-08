@@ -29,7 +29,7 @@ function ImageUpload() {
     const data = new FormData();
 
     for (let i = 0; i < state.image.length; i++) {
-      data.append("files", state.image[i]);
+      data.append("file", state.image[i]);
     }
 
     axios

@@ -33,7 +33,7 @@ def upload_file():
             return jsonify({'error': 'No selected file'})
 
         # Check if the file is allowed (you can add more file types if needed)
-        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif','tif','tiff'}
         if not allowed_file(file.filename, allowed_extensions):
             return jsonify({'error': 'Invalid file type'})
 
