@@ -304,11 +304,20 @@ model= UNETModel().to(device)
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
 check_path = r'E:\Spl3\spl3\model_best.ckpt'
-model.load_from_checkpoint(check_path, map_location=device) 
+model = model.load_from_checkpoint(check_path, map_location=device) 
 
 
 # print(help(model))
+image_transform = torchvision.transforms.Compose([
+    torchvision.transforms.ToTensor(),
+#     torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+])
+image_path =r'E:\Spl3\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif'
+
+image = cv2.imread(image_path)
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+image = image_transform(image).float()
 with torch.no_grad():
-    ans = model(r'E:\Spl3\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif')
+    ans = model.forward([image])
 pr_masks = (ans.sigmoid() > .5).float()
 print(pr_masks)
