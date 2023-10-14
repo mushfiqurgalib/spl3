@@ -66,11 +66,6 @@ CORS(app, supports_credentials=True)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# MongoDB setup
-
-client = pymongo.MongoClient('mongodb+srv://bsse1130:11811109@cluster0.lb7vjxi.mongodb.net/')
-
-db = client['Sample']
 
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
