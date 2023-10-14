@@ -1,7 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,send_file
 from flask_cors import CORS
-import pymongo
 import os
+
 import os
 import numpy as np
 import pandas as pd
@@ -60,17 +60,25 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
+
+
+
+
+import pandas as pd
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 # Define the directory where uploaded images will be stored
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+OUTPUT_FOLDER = 'output'
+app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 
 
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
+if not os.path.exists(OUTPUT_FOLDER):
+    os.makedirs(OUTPUT_FOLDER)
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
@@ -94,7 +102,7 @@ def upload_file():
 
         
         print(file.filename)
-        
+        image_processing(file)
 
         return jsonify({'message': 'File uploaded successfully'})
 
@@ -105,11 +113,12 @@ def allowed_file(filename, allowed_extensions):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-def image_processing():
-    
-
-    data = [['TCGA_CS_4941_19960909_12.tif', r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif',\
-            r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif', 0]]
+def image_processing(file):
+    import torchvision
+    from torchvision import transforms
+    print(file.filename)
+    data = [['file.filename', f'F:/spl3/flask/uploads/{file.filename}',
+           f'F:/spl3/flask/uploads/{file.filename}', 0]]
     columns = ['patient_id', 'img_path', 'mask_path', 'mask']
 
     mri_df = pd.DataFrame(data=data, columns=columns)
@@ -439,7 +448,7 @@ def image_processing():
     # print(len(train_loader))
 
     # img = cv2.imread(r'K:\Sikdar\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif')
-    img = Image.open(r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif')
+    # img = Image.open(r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif')
     print(len(train_loader))
     with torch.no_grad():
         ans = model(image=batch[0])
@@ -447,5 +456,8 @@ def image_processing():
     im = pr_masks[0][0].numpy()*255
     print(im.shape)
     cv2.imwrite('ans.jpg', im)
+    processed_image_path = os.path.join(app.config['OUTPUT_FOLDER'],'ans.jpg')
+    # Return the processed image
+    return send_file(processed_image_path)
 if __name__ == '__main__':
     app.run(debug=True)
