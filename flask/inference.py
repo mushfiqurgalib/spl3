@@ -1,3 +1,4 @@
+
 import os
 import numpy as np
 import pandas as pd
@@ -56,7 +57,64 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
+data = [['TCGA_CS_4941_19960909_12.tif', r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif',\
+        r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif', 0]]
+columns = ['patient_id', 'img_path', 'mask_path', 'mask']
 
+mri_df = pd.DataFrame(data=data, columns=columns)
+
+image_transform = torchvision.transforms.Compose([
+    torchvision.transforms.ToTensor(),
+#     torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+])
+
+mask_transform = torchvision.transforms.Compose([
+    torchvision.transforms.ToTensor(),
+    ])
+
+def  adjust_data(img, mask):
+    img = img / 255.
+    mask = mask / 255.
+    mask[mask > 0.5] = 1.0
+    mask[mask <= 0.5] = 0.0
+    
+    return (img, mask)
+
+class MyDataset(Dataset):
+    def __init__(self, df= mri_df, 
+                 adjust_data = adjust_data, 
+                 image_transform=image_transform, mask_transform=mask_transform):
+        self.df = df
+        self.image_transform = image_transform
+        self.mask_transform = mask_transform
+        self.adjust_data= adjust_data
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        image_path = self.df.loc[idx, 'img_path']
+        mask_path = self.df.loc[idx, 'mask_path']
+
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        mask = cv2.imread(mask_path)
+#         mask =cv2.imread(mask_path, 0)
+        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+#         _, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+
+        image, mask = self.adjust_data(image, mask)
+
+        if self.image_transform:
+            image = self.image_transform(image).float()
+
+        if self.mask_transform:
+            mask = self.mask_transform(mask)
+        return image, mask
+    
+print(len(mri_df))
+traids = MyDataset(df=mri_df)
+train_loader = DataLoader(traids, batch_size=1)
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 class Block(nn.Module):
     def __init__(self, inputs = 3, middles = 64, outs = 64):
@@ -191,7 +249,7 @@ class UNETModel(pl.LightningModule):
         assert image.ndim == 4
 
         # Check that image dimensions are divisible by 32, 
-        # encoder and decoder connected by `skip connections` and usually encoder have 5 stages of 
+        # encoder and decoder connected by skip connections and usually encoder have 5 stages of 
         # downsampling by factor 2 (2 ^ 5 = 32); e.g. if we have image with shape 65x65 we will have 
         # following shapes of features in encoder and decoder: 84, 42, 21, 10, 5 -> 5, 10, 20, 40, 80
         # and we will get an error trying to concat these features
@@ -209,7 +267,7 @@ class UNETModel(pl.LightningModule):
 
         logits_mask = self.forward(image)
         
-        # Predicted mask contains logits, and loss_fn param `from_logits` is set to True
+        # Predicted mask contains logits, and loss_fn param from_logits is set to True
         loss = self.loss_fn(logits_mask, mask)
 
         # Lets compute metrics for some threshold
@@ -303,8 +361,11 @@ model= UNETModel().to(device)
 
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
-check_path = r'E:\Spl3\spl3\model_best.ckpt'
-model = model.load_from_checkpoint(check_path, map_location=device) 
+check_path = r'F:\spl3\model_best.ckpt'
+# ckpt = torch.load(check_path, map_location=device)
+# print(ckpt.keys())
+# model = model.load_state_dict(ckpt['state_dict'])
+model = UNETModel.load_from_checkpoint(check_path, map_location=device) 
 
 
 # print(help(model))
@@ -312,12 +373,26 @@ image_transform = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor(),
 #     torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
 ])
-image_path =r'E:\Spl3\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif'
 
-image = cv2.imread(image_path)
-image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-image = image_transform(image).float()
+print(type(train_loader))
+x = iter(train_loader)
+batch = next(x)
+print('shape', batch[0].shape)
+# batch = next(iter(train_loader))
+# print(help(train_loader))
+# image_path =r'F:\galib\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif'
+
+# image = cv2.imread(image_path)
+# image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+# image = image_transform(image).float()
+# print(len(train_loader))
+
+# img = cv2.imread(r'K:\Sikdar\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif')
+img = Image.open(r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif')
+print(len(train_loader))
 with torch.no_grad():
-    ans = model.forward([image])
+    ans = model(image=batch[0])
 pr_masks = (ans.sigmoid() > .5).float()
-print(pr_masks)
+im = pr_masks[0][0].numpy()*255
+print(im.shape)
+cv2.imwrite('ans.jpg', im)
