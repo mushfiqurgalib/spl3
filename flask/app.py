@@ -70,8 +70,9 @@ CORS(app, supports_credentials=True)
 # Define the directory where uploaded images will be stored
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-OUTPUT_FOLDER = 'output'
+OUTPUT_FOLDER = r'F:\spl3\flask\output'
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
+print(os.listdir(OUTPUT_FOLDER))
 
 
 # Ensure the upload folder exists
@@ -456,8 +457,7 @@ def image_processing(file):
     im = pr_masks[0][0].numpy()*255
     print(im.shape)
     cv2.imwrite('ans.jpg', im)
-    processed_image_path = os.path.join(app.config['OUTPUT_FOLDER'],'ans.jpg')
-    # Return the processed image
-    return send_file(processed_image_path)
+    
+    return send_file('ans.jpg', mimetype='image/gif')
 if __name__ == '__main__':
     app.run(debug=True)
