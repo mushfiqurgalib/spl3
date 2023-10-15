@@ -104,8 +104,8 @@ def upload_file():
         
         print(file.filename)
         image_processing(file)
-
-        return jsonify({'message': 'File uploaded successfully'})
+        return send_file('ans.jpg', mimetype='image/gif')
+        # return jsonify({'message': 'File uploaded successfully'})
 
     except Exception as e:
         return jsonify({'error': str(e)})

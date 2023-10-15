@@ -16,12 +16,21 @@ function App() {
       formData.append("file", selectedFile);
 
       axios
-        .post("http://127.0.0.1:5000/upload", formData)
+        .post("http://127.0.0.1:5000/upload", formData, {
+          responseType: 'arraybuffer' // Ensure binary response
+        })
         .then((response) => {
-          if (response.status === 201) {
+          if (response.status === 200) {
             console.log("Image uploaded successfully");
-            setProcessedImage(response.data);
-            // You can set any state variables here based on the response.
+
+            // Create a blob from the binary response data
+            const blob = new Blob([response.data], { type: 'image/jpeg' });
+
+            // Convert the blob to an image URL
+            const imageUrl = URL.createObjectURL(blob);
+
+            // Set the processed image URL to display it
+            setProcessedImage(imageUrl);
           }
         })
         .catch((error) => {
@@ -55,7 +64,7 @@ function App() {
         </div>
       }
 
-{processedImage && (
+      {processedImage && (
         <div>
           <h2>Processed Image:</h2>
           <img src={processedImage} alt="Processed" />
