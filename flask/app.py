@@ -106,7 +106,7 @@ def upload_file():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         image_processing(file)
         with Image.open(os.path.join(app.config['UPLOAD_FOLDER'], file.filename)) as img:
-            outfile='ans1.jpg'
+            outfile=r'F:\spl3\react\frontend\src\images\ans1.jpg'
             img = img.convert('RGB')  # Convert to RGB format if it's not already
             img.save(outfile,'JPEG')
             

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import image1 from '../../src/images/ans1.jpg';
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -60,7 +61,7 @@ function App() {
       {selectedFile && 
         <div>
           <h2>Uploaded Image:</h2>
-          <img src={URL.createObjectURL(selectedFile)} alt="Uploaded" />
+          <img src={image1} alt="Uploaded" />
         </div>
       }
 
