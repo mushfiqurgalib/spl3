@@ -18,6 +18,10 @@ from pytorch_lightning.loggers import WandbLogger
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
+from skimage import io
+from io import BytesIO
+
+
 
 
 from tqdm import tqdm
@@ -100,11 +104,24 @@ def upload_file():
 
         # Save the uploaded file to the upload folder
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-
-        
-        print(file.filename)
         image_processing(file)
-        return send_file('ans.jpg', mimetype='image/gif')
+        with Image.open(os.path.join(app.config['UPLOAD_FOLDER'], file.filename)) as img:
+            outfile='ans1.jpg'
+            img = img.convert('RGB')  # Convert to RGB format if it's not already
+            img.save(outfile,'JPEG')
+            
+            #output_buffer.seek(0)
+
+        # Send the first image as a response
+        send_file('ans1.jpg', mimetype='image/jpeg')
+
+        # Now send the second image as a response
+        # output_buffer.close()
+        with open('ans.jpg', 'rb') as f:
+            # output_buffer = io.BytesIO(f.read())
+
+            return send_file('ans.jpg', mimetype='image/gif')
+        # return send_file('ans.jpg', mimetype='image/gif')
         # return jsonify({'message': 'File uploaded successfully'})
 
     except Exception as e:
