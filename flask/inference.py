@@ -57,8 +57,8 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-data = [['TCGA_CS_4941_19960909_12.tif', r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif',\
-        r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif', 0]]
+data = [['Image10.jpg', r'F:\spl3\flask\uploads\Image10.jpg',\
+        r'F:\spl3\flask\uploads\Image10.jpg', 0]]
 columns = ['patient_id', 'img_path', 'mask_path', 'mask']
 
 mri_df = pd.DataFrame(data=data, columns=columns)
@@ -388,7 +388,7 @@ print('shape', batch[0].shape)
 # print(len(train_loader))
 
 # img = cv2.imread(r'K:\Sikdar\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif')
-img = Image.open(r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif')
+img = Image.open(r'F:\spl3\flask\uploads\Image10.jpg')
 print(len(train_loader))
 with torch.no_grad():
     ans = model(image=batch[0])
