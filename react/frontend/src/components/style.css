@@ -5,3 +5,46 @@
     height: 100vh; /* Adjust this based on your layout */
   }
   
+  table {
+    
+  margin-top: 100px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 5px;
+    text-align: center;
+  }
+  
+  img {
+    max-width: 200px;
+  }
+  
+  .file-input-button {
+    margin-left: 5px;
+    margin-right: 4px;
+    padding: 5px 10px; /* Adjust padding as needed */
+    cursor: pointer;
+  }
+
+  .drop-area-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30vh; 
+    
+  }
+  
+  .drop-area {
+    width: 30px;
+    height: 20px;
+    padding: 20px;
+    /* border: 2px dashed #007bff; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  

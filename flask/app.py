@@ -143,7 +143,6 @@ def image_processing(file):
 
     image_transform = torchvision.transforms.Compose([
         torchvision.transforms.ToTensor(),
-    #     torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
 
     mask_transform = torchvision.transforms.Compose([
@@ -197,8 +196,6 @@ def image_processing(file):
     class Block(nn.Module):
         def __init__(self, inputs = 3, middles = 64, outs = 64):
             super().__init__()
-            #self.device = device
-            #self.dropout = nn.Dropout(dropout)
             
             self.conv1 = nn.Conv2d(inputs, middles, 3, 1, 1)
             self.conv2 = nn.Conv2d(middles, outs, 3, 1, 1)
@@ -209,10 +206,7 @@ def image_processing(file):
         def forward(self, x):
             
             x = self.relu(self.conv1(x))
-            x = self.relu(self.bn(self.conv2(x)))
-            # e1 = x
-            # x = self.pool(x)
-            
+            x = self.relu(self.bn(self.conv2(x)))           
             return self.pool(x), x
             # self.pool(x): [bs, out, h*.5, w*.5]
             # x: [bs, out, h, w]    

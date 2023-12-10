@@ -1,117 +1,120 @@
 import React, { useState } from "react";
 import axios from "axios";
+import image1 from "../../src/images/ans1.jpg";
+import { ThreeDots } from "react-loader-spinner";
+import "./style.css";
 
-function ImageUpload() {
-  const [state, setState] = useState({
-    image: null,
-    responseMsg: {
-      status: "",
-      message: "",
-      error: "",
-    },
-  });
+function App() {
+  const [fileName, setFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [processedImage, setProcessedImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showDragDropFileName, setShowDragDropFileName] = useState(false);
 
-  const handleChange = (e) => {
-    const imagesArray = [];
-
-    for (let i = 0; i < e.target.files.length; i++) {
-      imagesArray.push(e.target.files[i]);
-    }
-
-    setState((prevState) => ({
-      ...prevState,
-      image: imagesArray,
-    }));
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    setFileName(file.name);
+    setShowDragDropFileName(false);
   };
 
-  const submitHandler = (e) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
-    const data = new FormData();
+  };
 
-    for (let i = 0; i < state.image.length; i++) {
-      data.append("file", state.image[i]);
-    }
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+  };
 
-    axios
-      .post("http://127.0.0.1:5000/upload", data)
-      .then((response) => {
-        if (response.status === 201) {
-          setState((prevState) => ({
-            ...prevState,
-            responseMsg: {
-              status: response.data.status,
-              message: response.data.message,
-            },
-          }));
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        if (error.response) {
-          console.log(error.response);
-          if (error.response.status === 401) {
-            alert("Invalid credentials");
-          }
-        }
-      });
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFile = e.dataTransfer.files[0];
+    setSelectedFile(droppedFile);
+    setFileName(droppedFile.name);
+    setShowDragDropFileName(true);
+  };
+
+  const handleUploadButtonClick = () => {
+    uploadFile();
+  };
+
+  const uploadFile = () => {
+    // Upload logic
   };
 
   return (
-    <div className="container py-5">
-      <div className="row">
-        <div className="col-lg-12">
-          <form onSubmit={submitHandler} encType="multipart/form-data" id="imageForm">
-            <div className="card shadow">
-              {state.responseMsg.status === "successs" ? (
-                <div className="alert alert-success">
-                  {state.responseMsg.message}
-                </div>
-              ) : state.responseMsg.status === "failed" ? (
-                <div className="alert alert-danger">
-                  {state.responseMsg.message}
-                </div>
-              ) : (
-                ""
-              )}
-              <div className="card-header">
-                <h4 className="card-title fw-bold">
-                  React-JS and Python Flask Multiple Image Upload with Show Uploaded Images
-                </h4>
-              </div>
-              <div className="card-body">
-                <div className="form-group py-2">
-                  <label htmlFor="images">Images</label>
-                  <input
-                    type="file"
-                    name="image"
-                    multiple
-                    onChange={handleChange}
-                    className="form-control"
-                  />
-                  <span className="text-danger">{state.responseMsg.error}</span>
-                </div>
-                {state.image && state.image.length > 0 && (
-                  <div className="uploaded-image">
-                    <h5>Last Uploaded Image:</h5>
-                    <img
-                      src={URL.createObjectURL(state.image[state.image.length - 1])}
-                      alt="Last Uploaded"
-                      style={{ maxWidth: "100%", maxHeight: "300px" }}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="card-footer">
-                <button type="submit" className="btn btn-success">
-                  Upload
-                </button>
-              </div>
-            </div>
-          </form>
+    <div className="App">
+      <h1>Brain MRI Segmentation</h1>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          uploadFile();
+        }}
+        encType="multipart/form-data"
+        id="imageForm"
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <div className="drop-area">
+          <input
+            type="file"
+            onChange={handleFileChange}
+            accept="image/*"
+            style={{ display: "none" }}
+          />
+          <p>
+            {!showDragDropFileName && fileName
+              ? `Selected File: ${fileName}`
+              : "Drag & Drop your image here or click to select"}
+          </p>
         </div>
-      </div>
+        <button onClick={handleUploadButtonClick} className="btn btn-success">
+          Upload
+        </button>
+      </form>
+
+      {loading && (
+        <div className="loader-container">
+          <ThreeDots
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="80"
+            width="80"
+            radius="9"
+            color="#4fa94d"
+            ariaLabel="three-dots-loading"
+            wrapperStyle={{}}
+            wrapperClassName=""
+            visible={true}
+          />
+        </div>
+      )}
+
+      {processedImage && (
+        <div>
+          <table>
+            <tbody>
+              <tr>
+                <th>MRI Image:</th>
+                <th>Predicted Brain Tumor:</th>
+              </tr>
+              <tr>
+                <td><img src={image1} alt="Uploaded" /></td>
+                <td><img src={processedImage} alt="Processed" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
 
-export default ImageUpload;
+export default App;
