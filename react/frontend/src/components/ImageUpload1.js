@@ -9,6 +9,7 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [tumorpercentage,settumorpercentage] = useState("");
   
 
   const handleFileChange = (e) => {
@@ -60,15 +61,20 @@ function App() {
       formData.append("file", selectedFile);
 
       axios
-        .post("http://127.0.0.1:5000/upload", formData, {
-          responseType: "arraybuffer",
-        })
+        .post("http://127.0.0.1:5000/upload", formData, 
+        // {
+        //   responseType: "arraybuffer",
+        // }
+        )
         .then((response) => {
           if (response.status === 200) {
             console.log("Image uploaded successfully");
-
-            const blob = new Blob([response.data], { type: "image/jpeg" });
-            const imageUrl = URL.createObjectURL(blob);
+            console.log(response.data)
+            // const blob = new Blob([response.data], { type: "image/jpeg" });
+            // const imageUrl = response.data.image;
+            const imageUrl = `data:image/jpeg;base64,${response.data.image}`
+            const percentage = response.data.percentage;
+            settumorpercentage(percentage);
             setProcessedImage(imageUrl);
           }
         })
@@ -168,6 +174,24 @@ function App() {
 
 {processedImage && (
   <div>
+    <div>
+      {tumorpercentage != null ? (
+        <div>
+          <p>
+            <b>Tumor percentage: </b>
+            <span style={{ color: tumorpercentage < 5 ? 'green' : 'red' }}>
+              {tumorpercentage.toFixed(2)}
+            </span>
+            <span style={{ color: tumorpercentage < 5 ? 'green' : 'red' }}>
+              {tumorpercentage < 5 ? ' (Not Severe)' : ' (Severe)'}
+            </span>
+          </p>
+        </div>
+      ) : (
+        ""
+      )}
+    </div>
+
     <table>
       <tbody>
         <tr>
@@ -183,8 +207,7 @@ function App() {
   </div>
 )}
 </div>
-
-  );
-}
+  
+)}
 
 export default App;

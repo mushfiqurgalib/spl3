@@ -1,3 +1,4 @@
+import base64
 from flask import Flask, request, jsonify,send_file
 from flask_cors import CORS
 import os
@@ -74,9 +75,9 @@ CORS(app, supports_credentials=True)
 # Define the directory where uploaded images will be stored
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-OUTPUT_FOLDER = r'F:\spl3\flask\output'
+OUTPUT_FOLDER = r'E:\Spl3\spl3\flask\output'
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
-print(os.listdir(OUTPUT_FOLDER))
+# print(os.listdir(OUTPUT_FOLDER))
 
 
 # Ensure the upload folder exists
@@ -105,24 +106,37 @@ def upload_file():
         # Save the uploaded file to the upload folder
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         image_processing(file)
+        blackpixelnum = 0
         with Image.open(os.path.join(app.config['UPLOAD_FOLDER'], file.filename)) as img:
-            outfile=r'F:\spl3\react\frontend\src\images\ans1.jpg'
+            outfile=r'E:\spl3\spl3\react\frontend\src\images\ans1.jpg'
             img = img.convert('RGB')  # Convert to RGB format if it's not already
             img.save(outfile,'JPEG')
-            
+            blackpixelnum = count_black_pixels(outfile)
             #output_buffer.seek(0)
 
+        print(blackpixelnum)
         # Send the first image as a response
         send_file('ans1.jpg', mimetype='image/jpeg')
 
         # Now send the second image as a response
         # output_buffer.close()
+        mask_percentage = calculate_mask_percentage('ans.jpg',blackpixelnum)
+        # Now send the second image as a response
+        # output_buffer.close()
         with open('ans.jpg', 'rb') as f:
-            # output_buffer = io.BytesIO(f.read())
+            image_data = f.read()
 
-            return send_file('ans.jpg', mimetype='image/gif')
-        # return send_file('ans.jpg', mimetype='image/gif')
-        # return jsonify({'message': 'File uploaded successfully'})
+
+        # Convert image data to base64 for inclusion in the JSON response
+        image_base64 = base64.b64encode(image_data).decode('utf-8')
+       
+        # Return the response as a dictionary
+        return {
+            'image': image_base64,
+            'percentage': mask_percentage
+        }
+
+        # return jsonify(data)
 
     except Exception as e:
         return jsonify({'error': str(e)})
@@ -131,12 +145,52 @@ def allowed_file(filename, allowed_extensions):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
+def calculate_mask_percentage(filename,blackpixelnum):
+    mask1 = cv2.imread(filename,cv2.IMREAD_GRAYSCALE)
+
+# Ensure the mask is binary
+    _, binary_mask = cv2.threshold(mask1, 128, 255, cv2.THRESH_BINARY)
+
+# Calculate the number of white pixels and total pixels
+    num_white_pixels = np.sum(binary_mask == 255)
+   
+    total_pixels = np.prod(binary_mask.shape)
+    total_brain_pixels = total_pixels-blackpixelnum
+    # Calculate mask percentage
+    mask_percentage = (num_white_pixels / total_brain_pixels) * 100
+    # print(num_white_pixels)
+    # print(total_pixels)
+  
+    return mask_percentage
+
+from PIL import Image
+
+def count_black_pixels(outfile, threshold=10):
+    # Open the image
+    img = Image.open(outfile)
+
+    # Convert the image to RGB mode (in case it's in a different mode)
+    img = img.convert('RGB')
+
+    # Get the image data
+    pixels = img.getdata()
+
+    # Count the number of black pixels (where all RGB values are below the threshold)
+    black_pixel_count = sum(1 for pixel in pixels if all(value < threshold for value in pixel))
+
+    return black_pixel_count
+
+
+
+# print(f'Number of black pixels: {black_pixel_count}')
+
+
 def image_processing(file):
     import torchvision
     from torchvision import transforms
-    print(file.filename)
-    data = [['file.filename', f'F:/spl3/flask/uploads/{file.filename}',
-           f'F:/spl3/flask/uploads/{file.filename}', 0]]
+    # print(file.filename)
+    data = [['file.filename', f'E:/spl3/spl3/flask/uploads/{file.filename}',
+           f'E:/spl3/spl3/flask/uploads/{file.filename}', 0]]
     columns = ['patient_id', 'img_path', 'mask_path', 'mask']
 
     mri_df = pd.DataFrame(data=data, columns=columns)
@@ -189,7 +243,7 @@ def image_processing(file):
                 mask = self.mask_transform(mask)
             return image, mask
         
-    print(len(mri_df))
+    # print(len(mri_df))
     traids = MyDataset(df=mri_df)
     train_loader = DataLoader(traids, batch_size=1)
     device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
@@ -433,7 +487,7 @@ def image_processing(file):
 
     device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
-    check_path = r'F:\spl3\model_best.ckpt'
+    check_path = r'E:\spl3\spl3\model_best.ckpt'
     # ckpt = torch.load(check_path, map_location=device)
     # print(ckpt.keys())
     # model = model.load_state_dict(ckpt['state_dict'])
@@ -446,29 +500,23 @@ def image_processing(file):
     #     torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
 
-    print(type(train_loader))
+    # print(type(train_loader))
     x = iter(train_loader)
     batch = next(x)
-    print('shape', batch[0].shape)
-    # batch = next(iter(train_loader))
-    # print(help(train_loader))
-    # image_path =r'F:\galib\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif'
-
-    # image = cv2.imread(image_path)
-    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    # image = image_transform(image).float()
-    # print(len(train_loader))
-
-    # img = cv2.imread(r'K:\Sikdar\spl3\flask\uploads\TCGA_CS_4941_19960909_1.tif')
-    # img = Image.open(r'F:\spl3\flask\uploads\TCGA_CS_4941_19960909_12.tif')
-    print(len(train_loader))
+   
+  
     with torch.no_grad():
         ans = model(image=batch[0])
     pr_masks = (ans.sigmoid() > .5).float()
     im = pr_masks[0][0].numpy()*255
-    print(im.shape)
+  
     cv2.imwrite('ans.jpg', im)
-    
+
     return send_file('ans.jpg', mimetype='image/gif')
+
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
