@@ -1,13 +1,18 @@
 import './App.css';
-import React from "react";
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+// import React from 'react';
+
+import { BrowserRouter as Router, Route, Routes, BrowserRouter, HashRouter } from 'react-router-dom';
 import ImageUpload1 from "./components/ImageUpload1";
+import Login from './components/Login';
 
 function App() {
   return (
-    
-        <ImageUpload1/>
-      
+    <BrowserRouter>
+        <Routes>
+          <Route path='/' element ={<ImageUpload1/>}/>
+          <Route path='/login' element ={<Login/>}/>
+        </Routes>
+    </BrowserRouter>
   );
 }
 

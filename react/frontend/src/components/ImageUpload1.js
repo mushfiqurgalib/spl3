@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import image1 from "../../src/images/ans1.jpg";
+import image2 from "../../src/images/Capture.PNG"
 import { ThreeDots } from "react-loader-spinner";
+import MetricsChart from "./MetricsChart";
+import { Bar } from "react-chartjs-2";
 import "./style.css";
 
 function App() {
@@ -201,6 +204,10 @@ function App() {
         <tr>
           <td><img src={image1} alt="Uploaded" /></td>
           <td><img src={processedImage} alt="Processed" /></td>
+        </tr>
+        <tr>
+        <MetricsChart precision={81} f1Score={61} />
+
         </tr>
       </tbody>
     </table>
