@@ -6,6 +6,7 @@ app = Flask(__name__)  # Fix: Use __name__ instead of __auth__
 CORS(app)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000/login"}})
 
+
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''

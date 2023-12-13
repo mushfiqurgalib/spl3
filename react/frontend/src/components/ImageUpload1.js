@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import image1 from "../../src/images/ans1.jpg";
-import image2 from "../../src/images/Capture.PNG"
 import { ThreeDots } from "react-loader-spinner";
-import MetricsChart from "./MetricsChart";
-import { Bar } from "react-chartjs-2";
-import "./style.css";
+
 
 function App() {
   const [fileName, setFileName] = useState("");
@@ -59,23 +56,28 @@ function App() {
   const uploadFile = () => {
     if (selectedFile) {
       setLoading(true);
-
+  
+      // Retrieve the username from localStorage
+      const username = localStorage.getItem('username');
+  
       const formData = new FormData();
       formData.append("file", selectedFile);
-
+  
+      // Include the username in the request headers
+      const config = {
+        headers: {
+          Authorization: username,
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+  
       axios
-        .post("http://127.0.0.1:5000/upload", formData, 
-        // {
-        //   responseType: "arraybuffer",
-        // }
-        )
+        .post("http://127.0.0.1:5000/upload", formData, config)
         .then((response) => {
           if (response.status === 200) {
             console.log("Image uploaded successfully");
-            console.log(response.data)
-            // const blob = new Blob([response.data], { type: "image/jpeg" });
-            // const imageUrl = response.data.image;
-            const imageUrl = `data:image/jpeg;base64,${response.data.image}`
+            console.log(response.data);
+            const imageUrl = `data:image/jpeg;base64,${response.data.image}`;
             const percentage = response.data.percentage;
             settumorpercentage(percentage);
             setProcessedImage(imageUrl);
@@ -97,6 +99,7 @@ function App() {
       console.log("No file selected");
     }
   };
+  
 
   return (
     <div className="App">
@@ -206,7 +209,7 @@ function App() {
           <td><img src={processedImage} alt="Processed" /></td>
         </tr>
         <tr>
-        <MetricsChart precision={81} f1Score={61} />
+       
 
         </tr>
       </tbody>

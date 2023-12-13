@@ -1,8 +1,11 @@
 import base64
+import datetime
 from flask import Flask, request, jsonify,send_file
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import os
-
+import gridfs
+from pymongo import MongoClient
+from flask_pymongo import PyMongo
 import os
 import numpy as np
 import pandas as pd
@@ -65,26 +68,108 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-
+import cloudinary
+import cloudinary.uploader
 
 
 
 import pandas as pd
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+cloudinary.config(
+    cloud_name="dcq7wziss",
+    api_key="826634675587898",
+    api_secret="JmPco8V2Xa6-hOc4oxQ8EbuhFIo"
+)
+
 CORS(app, supports_credentials=True)
 # Define the directory where uploaded images will be stored
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-OUTPUT_FOLDER = r'E:\Spl3\spl3\flask\output'
+OUTPUT_FOLDER = r'F:\spl3\flask\output'
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
+app.config["MONGO_URI"]="mongodb+srv://bsse1130:11811109@cluster0.lb7vjxi.mongodb.net/"
+
+client = MongoClient('mongodb+srv://bsse1130:11811109@cluster0.lb7vjxi.mongodb.net/')
+mongodb_client=PyMongo(app)
+db=mongodb_client.db
+# fs = gridfs.GridFS(db,collection='Image')
+db = client['spl3']
+users_collection = db['users']
 # print(os.listdir(OUTPUT_FOLDER))
+@app.route('/signup', methods=['POST','OPTIONS'])
+@cross_origin()
+def signup():
+   data = request.get_json()
+   username = data.get('username')
+   password = data.get('password')
+   email = data.get('email')
+
+    # Check if the username already exists
+   if users_collection.find_one({'username': username}):
+        return jsonify({'message': 'Username already exists'}), 400
+
+    # Insert new user into MongoDB
+   user_data = {
+        'username': username,
+        'password': password,
+        'email': email
+    }
+
+   try:
+        result = users_collection.insert_one(user_data)
+        print(f"Inserted user with _id: {result.inserted_id}")
+        return jsonify({'message': 'Signup successful'})
+   except Exception as e:
+        print(f"Error inserting user: {e}")
+        return jsonify({'message': 'Error during signup'}), 500
+
+#    return jsonify({'message': 'Signup successful'})
+
+from flask_pymongo import ObjectId
+
+# ...
+
+@app.route('/get_images', methods=['GET'])
+@cross_origin()
+def get_images():
+    username = request.args.get('username')
+
+    # Retrieve images for the given username
+    images = image_collection.find({'username': username})
+
+    # Convert images to a list for easier serialization
+    image_list = []
+    for image in images:
+        # Convert ObjectId to string for serialization
+        image['_id'] = str(image['_id'])
+        image_list.append(image)
+    print(image_list)
+    return jsonify(image_list)
 
 
+@app.route('/login', methods=['POST','OPTIONS'])
+@cross_origin()
+def login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    # Check if the username and password match an existing user
+    user = users_collection.find_one({'username': username, 'password': password})
+
+    if user:
+        return jsonify({'message': 'Login successful'})
+    else:
+        return jsonify({'message': 'Invalid credentials'}), 401
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
+image_collection = db['Image']    
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
@@ -104,16 +189,29 @@ def upload_file():
             return jsonify({'error': 'Invalid file type'})
 
         # Save the uploaded file to the upload folder
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+        # file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         image_processing(file)
         blackpixelnum = 0
+        username = request.headers.get('Authorization')  # Assuming the username is included in the Authorization header
+
+        upload_result = cloudinary.uploader.upload('ans.jpg')
+        # print(upload_result)
         with Image.open(os.path.join(app.config['UPLOAD_FOLDER'], file.filename)) as img:
-            outfile=r'E:\spl3\spl3\react\frontend\src\images\ans1.jpg'
+            outfile=r'F:\spl3\react\frontend\src\images\ans1.jpg'
             img = img.convert('RGB')  # Convert to RGB format if it's not already
             img.save(outfile,'JPEG')
             blackpixelnum = count_black_pixels(outfile)
-            #output_buffer.seek(0)
-
+            mask_percentage = calculate_mask_percentage('ans.jpg',blackpixelnum)
+            current_time = datetime.datetime.now()
+       
+        
+        image_info = {
+            "url": upload_result["secure_url"],
+            'username': username,
+            'percentage': mask_percentage,
+            'current_time': current_time,
+          
+        }
         print(blackpixelnum)
         # Send the first image as a response
         send_file('ans1.jpg', mimetype='image/jpeg')
@@ -121,6 +219,8 @@ def upload_file():
         # Now send the second image as a response
         # output_buffer.close()
         mask_percentage = calculate_mask_percentage('ans.jpg',blackpixelnum)
+        result = image_collection.insert_one(image_info)
+        print(f"Inserted image info with _id: {result.inserted_id}")
         # Now send the second image as a response
         # output_buffer.close()
         with open('ans.jpg', 'rb') as f:
@@ -189,8 +289,8 @@ def image_processing(file):
     import torchvision
     from torchvision import transforms
     # print(file.filename)
-    data = [['file.filename', f'E:/spl3/spl3/flask/uploads/{file.filename}',
-           f'E:/spl3/spl3/flask/uploads/{file.filename}', 0]]
+    data = [['file.filename', f'F:/spl3/flask/uploads/{file.filename}',
+           f'F:/spl3/flask/uploads/{file.filename}', 0]]
     columns = ['patient_id', 'img_path', 'mask_path', 'mask']
 
     mri_df = pd.DataFrame(data=data, columns=columns)
@@ -487,7 +587,7 @@ def image_processing(file):
 
     device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
-    check_path = r'E:\spl3\spl3\model_best.ckpt'
+    check_path = r'F:\spl3\model_best.ckpt'
     # ckpt = torch.load(check_path, map_location=device)
     # print(ckpt.keys())
     # model = model.load_state_dict(ckpt['state_dict'])

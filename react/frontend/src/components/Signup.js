@@ -3,9 +3,11 @@ import axios from 'axios';
 import './style.css';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+
+const Signup = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');  
   const [password, setPassword] = useState('');
 
   const handleLogin = async (e) => {
@@ -14,24 +16,27 @@ const Login = () => {
     try {
       console.log(username, password);
 
-      const response = await axios.post('http://127.0.0.1:5000/login', {
+      const response = await axios.post('http://127.0.0.1:5000/signup', {
         username,
+        email,
         password,
       });
-      if(response.status === 200){
+
+      if (response.status === 200) {
         const data = response.data;
         console.log(data.message);
-        
-        // Save username to local storage
-         localStorage.setItem('username', username);
+      
 
         // Show success alert
-        alert('Login successful');
-        navigate('/');
-      }
-
-      const data = response.data;
-      console.log(data.message);
+        alert('Signup successful');
+        navigate('/login');
+    } else if(response.status === 400) { 
+        // Show unsuccessful alert
+        alert('Signup unsuccessful');
+    }
+    else{
+      alert('Signup unsuccessful');
+    }
     } catch (error) {
       console.error('Error:', error);
     }
@@ -42,7 +47,7 @@ const Login = () => {
     <div className='auth-wrapper'>
       <div className='auth-inner'>
         <form onSubmit={handleLogin}>
-          <h3>Sign In</h3>
+          <h3>Sign Up</h3>
           <div className="mb-3">
             <label>Username</label>
             <input
@@ -51,6 +56,16 @@ const Login = () => {
               placeholder="Enter Name"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <label>Email</label>
+            <input
+              type="email"
+              className="form-control"
+              placeholder="Enter Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="mb-3">
@@ -87,4 +102,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
