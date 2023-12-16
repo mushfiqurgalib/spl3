@@ -11,7 +11,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <ImageUpload1 />,
+    element: <Login />,
   },
 ]);
 root.render(

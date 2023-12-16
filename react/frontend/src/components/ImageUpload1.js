@@ -2,15 +2,20 @@ import React, { useState } from "react";
 import axios from "axios";
 import image1 from "../../src/images/ans1.jpg";
 import { ThreeDots } from "react-loader-spinner";
-
+import { useNavigate } from 'react-router-dom';
 
 function App() {
+  const navigate = useNavigate();
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tumorpercentage,settumorpercentage] = useState("");
   
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    navigate('/login')
+  }
 
   const handleFileChange = (e) => {
     const file = e.target.files && e.target.files[0];
@@ -102,6 +107,30 @@ function App() {
   
 
   return (
+    <>
+    <nav className="navbar navbar-expand-lg bg-primary">
+  <div className="container-fluid">
+    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span className="navbar-toggler-icon"></span>
+    </button>
+    <div className="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+        <li className="nav-item">
+          <a className="nav-link active" aria-current="page" href="/">Home</a>
+        </li>
+        <li className="nav-item">
+          <a className="nav-link" href="/history">History</a>
+        </li>
+        
+      </ul>
+      <ul className="navbar-nav ml-auto">
+        <li className="nav-item">
+          <button className="btn-danger" onClick={handleLogout} >Logout</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
     <div className="App">
       <h1>Brain MRI Segmentation</h1>
       <form
@@ -188,9 +217,9 @@ function App() {
             <span style={{ color: tumorpercentage < 5 ? 'green' : 'red' }}>
               {tumorpercentage.toFixed(2)}
             </span>
-            <span style={{ color: tumorpercentage < 5 ? 'green' : 'red' }}>
+            {/* <span style={{ color: tumorpercentage < 5 ? 'green' : 'red' }}>
               {tumorpercentage < 5 ? ' (Not Severe)' : ' (Severe)'}
-            </span>
+            </span> */}
           </p>
         </div>
       ) : (
@@ -217,7 +246,7 @@ function App() {
   </div>
 )}
 </div>
-  
+</>
 )}
 
 export default App;

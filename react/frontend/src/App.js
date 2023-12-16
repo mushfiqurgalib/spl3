@@ -12,8 +12,8 @@ function App() {
   return (
     <BrowserRouter>
         <Routes>
-          <Route path='/' element ={<ImageUpload1/>}/>
-          <Route path='/login' element ={<Login/>}/>
+          <Route path='/' element ={<Login/>}/>
+          <Route path='/image' element ={<ImageUpload1/>}/>
           <Route path='/signup' element ={<Signup/>}/>
           <Route path='/history' element ={<History/>}/>
         </Routes>

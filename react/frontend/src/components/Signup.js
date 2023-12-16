@@ -29,7 +29,7 @@ const Signup = () => {
 
         // Show success alert
         alert('Signup successful');
-        navigate('/login');
+        navigate('/');
     } else if(response.status === 400) { 
         // Show unsuccessful alert
         alert('Signup unsuccessful');
@@ -80,14 +80,9 @@ const Signup = () => {
           </div>
           <div className="mb-3">
             <div className="custom-control custom-checkbox">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="customCheck1"
-              />
-              <label className="custom-control-label" htmlFor="customCheck1">
-                Remember me
-              </label>
+              <div>
+                Already have an account? <a href="/">Sign In</a>
+              </div>
             </div>
           </div>
           <div className="d-grid">
