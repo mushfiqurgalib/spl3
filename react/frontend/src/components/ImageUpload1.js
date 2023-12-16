@@ -116,10 +116,10 @@ function App() {
     <div className="collapse navbar-collapse" id="navbarSupportedContent">
       <ul className="navbar-nav me-auto mb-2 mb-lg-0">
         <li className="nav-item">
-          <a className="nav-link active" aria-current="page" href="/">Home</a>
+          <a className="nav-link active" aria-current="page" href="/"  style={{ color: 'white' }}>Home</a>
         </li>
         <li className="nav-item">
-          <a className="nav-link" href="/history">History</a>
+          <a className="nav-link" href="/history"  style={{ color: 'white' }}>History</a>
         </li>
         
       </ul>

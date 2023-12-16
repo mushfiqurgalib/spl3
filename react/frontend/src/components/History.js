@@ -78,10 +78,10 @@ const History = () => {
     <div className="collapse navbar-collapse" id="navbarSupportedContent">
       <ul className="navbar-nav me-auto mb-2 mb-lg-0">
         <li className="nav-item">
-          <a className="nav-link active" aria-current="page" href="/image">Home</a>
+          <a className="nav-link active" aria-current="page" href="/image"  style={{ color: 'white' }}>Home</a>
         </li>
         <li className="nav-item">
-          <a className="nav-link" href="/history">History</a>
+          <a className="nav-link" href="/history"  style={{ color: 'white' }}>History</a>
         </li>
         
       </ul>
@@ -100,10 +100,10 @@ const History = () => {
         <table>
           <thead>
             <tr>
-            <th>Current Time</th>
-              <th>Percentage</th>
+            <th>Upload Time</th>
+              <th>Tumor Percentage</th>
               
-              <th>Image</th>
+              <th>Segmented Image</th>
             </tr>
           </thead>
           <tbody>

@@ -70,7 +70,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import cloudinary
 import cloudinary.uploader
-
+import pytz
 
 
 import pandas as pd
@@ -202,7 +202,8 @@ def upload_file():
             img.save(outfile,'JPEG')
             blackpixelnum = count_black_pixels(outfile)
             mask_percentage = calculate_mask_percentage('ans.jpg',blackpixelnum)
-            current_time = datetime.datetime.now()
+            local_timezone = pytz.timezone('Asia/Dhaka')
+            current_time = datetime.datetime.now(local_timezone)
        
         
         image_info = {
