@@ -32,3 +32,48 @@ To set up the project locally, follow these steps:
 source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 3.Install the required packages:
   pip install -r requirements.txt
+## Dataset
+The dataset used for training and testing the model is sourced from [insert dataset source, e.g., Kaggle, BraTS]. It includes:
+
+MRI scans of brain images in various formats (e.g., NIfTI).
+Ground truth segmentation masks for training the model.
+Data Preparation
+Instructions on how to preprocess the data can be found in the data_preprocessing.py file.
+
+## Model Architecture
+This project employs the U-Net architecture, which consists of:
+
+Encoder: Downsampling path for capturing context.
+Bottleneck: Bridge between encoder and decoder.
+Decoder: Upsampling path for precise localization.
+Refer to the model.py file for detailed implementation of the U-Net architecture.
+
+## Usage
+To train the model, run:
+
+python train.py --data_dir <path_to_dataset> --epochs <number_of_epochs>
+To evaluate the model, run:
+
+
+python evaluate.py --model_path <path_to_trained_model> --data_dir <path_to_test_data>
+
+## Results
+The results of the segmentation model can be visualized using the visualize.py script. The following metrics will be displayed:
+
+Dice Coefficient
+Jaccard Index
+Sample segmentation results
+## Contributing
+Contributions are welcome! Please follow these steps to contribute:
+
+Fork the repository.
+Create a new branch (git checkout -b feature/YourFeature).
+Make your changes and commit them (git commit -m 'Add new feature').
+Push to the branch (git push origin feature/YourFeature).
+Create a pull request.
+License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Acknowledgements
+Dr.Emon Kumar Dey for guidance and support.
+The open-source community for various resources and libraries that facilitated this project.
